@@ -10,6 +10,12 @@ tags:
 - diffusers
 - diffusers-training
 - lora
+- stable-diffusion-xl
+- stable-diffusion-xl-diffusers
+- text-to-image
+- diffusers
+- diffusers-training
+- lora
 ---
 
 <!-- This model card has been generated automatically according to the information the training script had access to. You
