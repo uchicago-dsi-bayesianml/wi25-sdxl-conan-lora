@@ -16,6 +16,11 @@ tags:
 - diffusers
 - diffusers-training
 - lora
+datasets:
+- jugg1024/conan-gpt4-captions
+language:
+- en
+pipeline_tag: text-to-image
 ---
 
 <!-- This model card has been generated automatically according to the information the training script had access to. You
