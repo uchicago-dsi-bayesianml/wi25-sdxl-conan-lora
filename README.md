@@ -39,21 +39,40 @@ These are LoRA adaption weights for stabilityai/stable-diffusion-xl-base-1.0. Th
 
 LoRA for the text encoder was enabled: True.
 
-Special VAE used for training: madebyollin/sdxl-vae-fp16-fix.
-
-
-## Intended uses & limitations
+VAE used for training: madebyollin/sdxl-vae-fp16-fix.
 
 #### How to use
 
 ```python
-# TODO: add an example code snippet for running this diffusion pipeline
+from diffusers import DiffusionPipeline
+
+pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0")
+pipe.load_lora_weights("yifei28/sdxl-base-1.0-Conan-lora")
+
+prompt = "Still from the Anime, Elon Musk"
+image = pipe(prompt).images[0]
 ```
 
 #### Limitations and bias
 
-[TODO: provide examples of latent issues and potential remediations]
+Abnormal human features: twisted faces and low-quality body and facial features.
+Only simple prompts yield better results, cannot handle long prompts. 
 
 ## Training details
 
-[TODO: describe the data used to train the model]
+--validation_epochs=1   
+--resolution=1024   
+--train_text_encoder   
+--train_batch_size=1   
+--num_train_epochs=10   
+--checkpointing_steps=1000
+--gradient_accumulation_steps=8   
+--learning_rate=1e-05   
+--lr_warmup_steps=500   
+--dataloader_num_workers=8   
+--allow_tf32   
+--mixed_precision="bf16"
+--rank=16
+
+### Please find the slides for presentation in this link
+[Presentation](https://docs.google.com/presentation/d/1gq5uIRyTaOBXhCrzijFYoMQhtGrQAh_QZ5IXeKLyPNA/edit?usp=sharing)
