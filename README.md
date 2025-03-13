@@ -58,6 +58,14 @@ image = pipe(prompt).images[0]
 Abnormal human features: twisted faces and low-quality body and facial features.
 Only simple prompts yield better results, cannot handle long prompts. 
 
+Note that due to the dataset we are fine-tuning on, only with some prefix, the style will transfer.
+Example Prefix:
+Still from the Anime, ...
+Still from Anime Series, ...
+Anime Series still of ...
+
+We encourage people to try different prompts with different prefix.
+
 ## Training details
 
 --validation_epochs=1   
