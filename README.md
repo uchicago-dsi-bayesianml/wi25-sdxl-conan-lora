@@ -31,10 +31,10 @@ should probably proofread and complete it, then remove this comment. -->
 
 These are LoRA adaption weights for stabilityai/stable-diffusion-xl-base-1.0. The weights were fine-tuned on the jugg1024/conan-gpt4-captions dataset. You can find some example images in the following. 
 
-![img_0](./image_0.png)
-![img_1](./image_1.png)
-![img_2](./image_2.png)
-![img_3](./image_3.png)
+![Still from the Anime Character, Mark Zuckerberg](./image_0.jpg)
+![Still from the Anime Character, Robert Downey Jr.](./image_1.jpg)
+![Still from the Anime, Draco Malfoy](./image_2.jpg)
+![Still from the Anime, Severus Snape](./image_3.jpg)
 
 
 LoRA for the text encoder was enabled: True.
