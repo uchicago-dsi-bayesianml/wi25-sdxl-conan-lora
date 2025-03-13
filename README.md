@@ -76,11 +76,11 @@ image = pipe(prompt).images[0]
     - But encountered issues, such as twisted faces and low-quality facial features.
 
 2. Adjustments for More Stable Gradients
-  1. Lower learning rate to 1e-5
-  2. Change mixed precision to bf16: Offer larger numerical range with the same memory usage
-  3. Increase batch size to 2: Allow more data per training iteration
-  4. Increase LoRA rank to 16: Increase the number of learnable parameters
-  5. Add warm-up steps to 500: Help stabilize the gradients by starting with a smaller learning rate
+   1. Lower learning rate to 1e-5
+   2. Change mixed precision to bf16: Offer larger numerical range with the same memory usage
+   3. Increase batch size to 2: Allow more data per training iteration
+   4. Increase LoRA rank to 16: Increase the number of learnable parameters
+   5. Add warm-up steps to 500: Help stabilize the gradients by starting with a smaller learning rate
 
 3. Metrics Results in FID Score
   - LoRA Fine-tuned: 99.7 (-15%)
