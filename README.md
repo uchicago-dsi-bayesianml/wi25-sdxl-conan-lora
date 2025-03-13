@@ -26,20 +26,8 @@ pipeline_tag: text-to-image
 <!-- This model card has been generated automatically according to the information the training script had access to. You
 should probably proofread and complete it, then remove this comment. -->
 
-
-# LoRA text2image fine-tuning - yifei28/sdxl-base-1.0-Conan-lora
-
-These are LoRA adaption weights for stabilityai/stable-diffusion-xl-base-1.0. The weights were fine-tuned on the jugg1024/conan-gpt4-captions dataset. You can find some example images in the following. 
-
-![Still from the Anime Character, Mark Zuckerberg](./image_0.jpg)
-![Still from the Anime Character, Robert Downey Jr.](./image_1.jpg)
-![Still from the Anime, Draco Malfoy](./image_2.jpg)
-![Still from the Anime, Severus Snape](./image_3.jpg)
-
-
-LoRA for the text encoder was enabled: True.
-
-VAE used for training: madebyollin/sdxl-vae-fp16-fix.
+### Please find the slides for presentation in this link
+[Presentation](https://docs.google.com/presentation/d/1gq5uIRyTaOBXhCrzijFYoMQhtGrQAh_QZ5IXeKLyPNA/edit?usp=sharing)
 
 #### How to use
 
@@ -86,5 +74,17 @@ We encourage people to try different prompts with different prefix.
 --mixed_precision="bf16"
 --rank=16
 
-### Please find the slides for presentation in this link
-[Presentation](https://docs.google.com/presentation/d/1gq5uIRyTaOBXhCrzijFYoMQhtGrQAh_QZ5IXeKLyPNA/edit?usp=sharing)
+
+# LoRA text2image fine-tuning - yifei28/sdxl-base-1.0-Conan-lora
+
+These are LoRA adaption weights for stabilityai/stable-diffusion-xl-base-1.0. The weights were fine-tuned on the jugg1024/conan-gpt4-captions dataset. You can find some example images in the following. 
+
+![Still from the Anime Character, Mark Zuckerberg](./image_0.jpg)
+![Still from the Anime Character, Robert Downey Jr.](./image_1.jpg)
+![Still from the Anime, Draco Malfoy](./image_2.jpg)
+![Still from the Anime, Severus Snape](./image_3.jpg)
+
+
+LoRA for the text encoder was enabled: True.
+
+VAE used for training: madebyollin/sdxl-vae-fp16-fix.
