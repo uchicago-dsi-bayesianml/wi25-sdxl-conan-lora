@@ -161,8 +161,13 @@ These are LoRA adaption weights for stabilityai/stable-diffusion-xl-base-1.0. Th
 Still from the Anime Character, Mark Zuckerberg
 
 ![Still from the Anime Character, Robert Downey Jr.](./image_1.jpg)
+Still from the Anime Character, Robert Downey Jr.
+
 ![Still from the Anime, Draco Malfoy](./image_2.jpg)
+Still from the Anime, Draco Malfoy
+
 ![Still from the Anime, Severus Snape](./image_3.jpg)
+Still from the Anime, Severus Snape
 
 
 LoRA for the text encoder was enabled: True.
