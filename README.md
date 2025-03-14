@@ -31,6 +31,20 @@ should probably proofread and complete it, then remove this comment. -->
 
 ### How to use
 
+#### Caution: Prefix needs to be added
+
+Note that due to the dataset we are fine-tuning on, only with some prefix, the style will transfer.
+
+Example Prefix:
+
+Still from the Anime, ...
+
+Still from Anime Series, ...
+
+Anime Series still of ...
+
+We encourage people to try different prompts with different prefix.
+
 ```python
 from diffusers import DiffusionPipeline
 
@@ -122,18 +136,6 @@ image = pipe(prompt).images[0]
 Abnormal human features: twisted faces and low-quality body and facial features.
 Only simple prompts yield better results, cannot handle long prompts. 
 
-Note that due to the dataset we are fine-tuning on, only with some prefix, the style will transfer.
-
-Example Prefix:
-
-Still from the Anime, ...
-
-Still from Anime Series, ...
-
-Anime Series still of ...
-
-We encourage people to try different prompts with different prefix.
-
 ## Training details
 
 --validation_epochs=1   
@@ -156,6 +158,8 @@ We encourage people to try different prompts with different prefix.
 These are LoRA adaption weights for stabilityai/stable-diffusion-xl-base-1.0. The weights were fine-tuned on the jugg1024/conan-gpt4-captions dataset. You can find some example images in the following. 
 
 ![Still from the Anime Character, Mark Zuckerberg](./image_0.jpg)
+Still from the Anime Character, Mark Zuckerberg
+
 ![Still from the Anime Character, Robert Downey Jr.](./image_1.jpg)
 ![Still from the Anime, Draco Malfoy](./image_2.jpg)
 ![Still from the Anime, Severus Snape](./image_3.jpg)
