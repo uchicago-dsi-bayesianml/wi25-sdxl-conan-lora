@@ -1,175 +1,120 @@
----
-base_model: stabilityai/stable-diffusion-xl-base-1.0
-library_name: diffusers
-license: creativeml-openrail-m
-inference: true
-tags:
-- stable-diffusion-xl
-- stable-diffusion-xl-diffusers
-- text-to-image
-- diffusers
-- diffusers-training
-- lora
-- stable-diffusion-xl
-- stable-diffusion-xl-diffusers
-- text-to-image
-- diffusers
-- diffusers-training
-- lora
-datasets:
-- jugg1024/conan-gpt4-captions
-language:
-- en
-pipeline_tag: text-to-image
----
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/banner-dark.png">
+  <img alt="The University of Chicago, MS in Applied Data Science. ADSP 32014 course project." src=".github/assets/banner-light.png">
+</picture>
 
-<!-- This model card has been generated automatically according to the information the training script had access to. You
-should probably proofread and complete it, then remove this comment. -->
+# Fine-Tuning SDXL with LoRA for Conan Image Generation
 
-### Please find the slides for presentation in this link
-[Presentation](https://docs.google.com/presentation/d/1gq5uIRyTaOBXhCrzijFYoMQhtGrQAh_QZ5IXeKLyPNA/edit?usp=sharing)
+> **Example project from Winter 2025.** This repository is a copy of the authors' Hugging Face repository [yifei28/sdxl-base-1.0-Conan-lora](https://huggingface.co/yifei28/sdxl-base-1.0-Conan-lora), with their commit history intact. Their model card is [MODEL_CARD.md](MODEL_CARD.md) and their slides are [on Google Slides](https://docs.google.com/presentation/d/1gq5uIRyTaOBXhCrzijFYoMQhtGrQAh_QZ5IXeKLyPNA/edit?usp=sharing). Course staff wrote this README and made the edits listed under [Changes by course staff](#changes-by-course-staff), including the section on [what to learn from this project](#what-to-learn-from-this-project).
 
-### How to use
+Can a large text-to-image model be taught the drawing style of one anime series with a small adapter and under two thousand images, and how would you tell whether it worked? The team fine-tuned Stable Diffusion XL with LoRA on 1,787 frames from *Detective Conan* and compared the result with the base model by FID.
 
-#### Caution: Prefix needs to be added
+## Summary
 
-Note that due to the dataset we are fine-tuning on, only with some prefix, the style will transfer.
+The team trained low-rank adapters for SDXL base 1.0, on the UNet and both text encoders, with the Hugging Face diffusers training script, on a public dataset of *Detective Conan* frames captioned by GPT-4. Five training runs between February 22 and 24, 2025 took the configuration from the script's defaults to a lower learning rate, bf16 precision, rank 16, and 500 warm-up steps, after the first run produced the style but distorted faces. They report an FID of 99.7 for the fine-tuned model against 117.4 for the base model, and found that prompts only pick up the style with a prefix such as "Still from the Anime, ...". The deliverables are the adapter weights, a model card with the tuning log, slides, and a four-page derivation of the DDPM training objective.
 
-Example Prefix:
+## Team and contributions
 
-Still from the Anime, ...
+- **Yifei Wang** ([yifei28](https://huggingface.co/yifei28) on Hugging Face, [@Yifei-Wang28](https://github.com/Yifei-Wang28) on GitHub): the training runs, the repository, and the derivation.
+- **Xinyi (Lia) Jiang** ([worldtu](https://huggingface.co/worldtu) on Hugging Face, [@worldtu](https://github.com/worldtu) on GitHub): co-author of the model card.
+- **Ke Wang** and **Maxine Wu**: named on the slides.
 
-Still from Anime Series, ...
+The [commit history](https://github.com/uchicago-dsi-bayesianml/wi25-sdxl-conan-lora/commits/main) is Yifei Wang's Hugging Face history. The slides don't say who did what beyond the card's co-authorship.
 
-Anime Series still of ...
+## Getting started
 
-We encourage people to try different prompts with different prefix.
+**Use the adapter.** The weights are 60 MB and load on top of SDXL base 1.0. A GPU with about 12 GB of memory is enough for inference.
+
+```sh
+pip install torch diffusers transformers accelerate safetensors
+```
 
 ```python
 from diffusers import DiffusionPipeline
 
-pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0")
-pipe.load_lora_weights("yifei28/sdxl-base-1.0-Conan-lora")
-
-prompt = "Still from the Anime, Elon Musk"
-image = pipe(prompt).images[0]
+pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0").to("cuda")
+pipe.load_lora_weights("yifei28/sdxl-base-1.0-Conan-lora")   # or the file from this repository's release
+image = pipe("Still from the Anime, a detective in a trench coat on a rainy street").images[0]
 ```
 
----
+The weights are also attached to [this repository's release](https://github.com/uchicago-dsi-bayesianml/wi25-sdxl-conan-lora/releases/tag/weights-2025-03), so the example works even if the Hugging Face repository goes away. Without the prefix the style mostly doesn't appear; the card lists the prefixes the team found to work.
 
-### Background
+**Reproduce the training.** The team used the diffusers example script `examples/text_to_image/train_text_to_image_lora_sdxl.py`, with the dataset under [Data](#data) and the flags recorded in the model card's "Training details": resolution 1024, text encoder training on, batch size 1 with gradient accumulation 8, learning rate 1e-5 with 500 warm-up steps, bf16, rank 16, 10 epochs, and the `madebyollin/sdxl-vae-fp16-fix` VAE. Training SDXL at this resolution needs a large GPU; the original runs were on rented hardware and pushed their checkpoints to Hugging Face automatically.
 
-- Focus: Adapt Stable Diffusion XL (SDXL) to generate images in Conan (Anime) style
-- Dataset: high-resolution Conan images with GPT-4-generated descriptions (Hugging Face)
-- Framework: SDXL is a latent diffusion model built on Denoising Diffusion Probabilistic Models (DDPM), leveraging iterative denoising to progressively refine image generation 
+## Data
 
-### Dataset Overview
+No training data is in this repository.
 
-- Shape: 1,790*2, image and text 
-- Images:  High resolution labeled images, vary from 890~1,300px
-- Text: GPT-4-generated captions, making it well-suited for refining SDXL’s text-image alignment capabilities in such style.
-- No extra data transformation needed
+- **Source:** [jugg1024/conan-gpt4-captions](https://huggingface.co/datasets/jugg1024/conan-gpt4-captions) on Hugging Face: 1,787 frames from the anime *Detective Conan*, 890 to 1,300 pixels on a side, each with an English caption generated by GPT-4. Uploaded by a third party in July 2024.
+- **Terms:** the dataset declares no license, and the frames are stills from a copyrighted series. The team didn't make the dataset and didn't redistribute it. Treat the adapter as a study of style transfer, not as something to build a product on, and don't copy the dataset anywhere.
+- **How to get it:** `load_dataset("jugg1024/conan-gpt4-captions")`, which the training script does for you.
 
-### Model Selection & Metrics
+## Project structure
 
-- Pretrained Model: Stable Diffusion Model is a text‐to‐image generative model based on diffusion processes. SDXL (“Stable Diffusion XL”), as an advanced version of Stable diffusion, has improved image quality with super resolution, enhanced text‐image alignment.
-- Fine-tuning: LoRA(Low‐Rank Adaptation) is a parameter‐efficient fine‐tuning method adapts SDXL effectively to our specific domain of Conan‐style image generation. It offers several advantages like it preserves pretrained knowledge and faster fine‐tuning, making it an efficient and cost‐effective.
-- Metrics: FID Score is a measure of similarity between two datasets of images. It is often used to evaluate the quality of samples of Generative Adversarial Networks.  FID is calculated by computing the Fréchet distance between two Gaussians fitted to feature representations of the Inception network.
+| Path | Contents |
+|---|---|
+| `MODEL_CARD.md` | The authors' model card: background, dataset, tuning log, FID results, problems, future work, training flags, and the usage snippet. |
+| `DDPM_derivations.pdf` | Yifei Wang's four-page derivation of the DDPM forward process, the variational bound, and the noise-prediction loss. |
+| `image_0.jpg` to `image_3.jpg` | The samples shown in the model card. |
+| `image_0.png` to `image_7.png` | The samples shown in the presentation. |
+| `LICENSE` | CreativeML Open RAIL-M, the license the model card declares for the weights. |
+| Release `weights-2025-03` | `pytorch_lora_weights.safetensors`, the final adapter. |
 
-### Model Engineering and Fine-tuning Logic
+The training checkpoints that filled the original repository, 90 folders with optimizer states totaling about 8 GB, are not in the tree. They remain in the Hugging Face repository.
 
-1. Baseline Installation with Default Parameters
-  - Learning Rate = 1e-4
-  - LoRA Rank = 4
-  - Batch Size = 1
-  - Mixed Precision = fp16
-  - LR Warm-up Steps 0
+## Method
 
-  - Results:
-    - Successful style transfer
-    - But encountered issues, such as twisted faces and low-quality facial features.
+**Model.** SDXL base 1.0 is a latent diffusion model: a VAE maps images to a latent space, a UNet is trained to predict the noise added to latents at each step of a fixed forward diffusion, and two text encoders condition the UNet on the prompt. LoRA adds a low-rank update to selected weight matrices and trains only that update, here with rank 16 on the UNet attention layers and on both text encoders. The frozen base weights keep what SDXL already knows; the adapter carries the style.
 
-2. Adjustments for More Stable Gradients
-   1. Lower learning rate to 1e-5
-   2. Change mixed precision to bf16: Offer larger numerical range with the same memory usage
-   3. Increase batch size to 2: Allow more data per training iteration
-   4. Increase LoRA rank to 16: Increase the number of learnable parameters
-   5. Add warm-up steps to 500: Help stabilize the gradients by starting with a smaller learning rate
+**Training.** The standard noise-prediction loss, mean squared error between the sampled noise and the UNet's prediction. Five runs: the first with the script's defaults, learning rate 1e-4, rank 4, fp16, no warm-up, which transferred the style but distorted faces, then one with the configuration above. The card records a tuning log with a reason for each change.
 
-3. Metrics Results in FID Score
-  - LoRA Fine-tuned: 99.7 (-15%)
-  - Base model: 117.4
+**Evaluation.** FID between generated images and the training frames, 99.7 for the fine-tuned model against 117.4 for the base model, a 15 percent reduction. The card gives no further detail on the computation.
 
-### Current Model Problems and Solutions
+### What is Bayesian here
 
-- Current Problems:
-  1. Still have abnormal human features: twisted faces and low-quality body and facial features.
-  2. Current Text Captions are generated by other GPT models using Images, text quality cannot be promised
-     - Most of them start with “Still from animates”, “Animated characters”, etc.
-  3. From experiments, simple prompts yield better results compared to additional predicates
-     - Including only nouns and preps
-     - Current Tokenizer CLIP only include 77 tokens
+The derivation PDF is where the course material lives. A diffusion model is a latent-variable model: the forward process is a fixed Gaussian Markov chain that destroys an image over T steps, and the reverse process is a learned chain that rebuilds it. The log-likelihood of an image is intractable, so training maximizes a variational lower bound, the same ELBO as a VAE with T latents. The bound decomposes into KL divergences between the learned reverse step and the true posterior of the forward step given the clean image, and that posterior is obtained with Bayes' rule and is Gaussian in closed form. Writing out its mean shows that the reverse step only needs to predict the added noise, which turns the bound into the mean squared error the training script minimizes. The PDF walks through exactly this, which is the right thing to understand before fine-tuning such a model.
 
-- Solutions for Future Improvement:
-  1. Change loss function to align more with human visual perception
-     - Currently using MSE (standard for DMs)
-     - Incorporating Perceptual Loss, capturing more abstract information like texture, structure, and style
-  2. Enhance hardware and resource budget to fit with more complex prompts
-     - Upgrading to better GPU, increasing larger batch size, and increasing LoRA rank to 64
-  3. Elaborate higher quality Text Captions
-     - Enhance linguistic diversity, using more different syntactic patterns and structures
+What the project doesn't do is Bayesian inference about anything: the adapter is a point estimate, there is no posterior over its weights, and no uncertainty is reported for the generated images or the FID.
 
-### Future Opportunities
+## Results
 
-1. Anime & Game Industry
-   - AI-assisted character design → faster concept art creation.
-   - Style transfer for anime production & comics.
-2. Personalized Content Creation
-   - Custom AI-generated avatars, wallpapers, and artworks.
-   - AI-powered manga generation based on text input.
-3. Enhancing Model Performance
-   - Transformer-based Diffusion (DiT) for better generation quality.
-   - 3D model adaptation for AI-generated anime in gaming/metaverse.
+The FID comparison above is the only measurement. The qualitative results are the samples: Harry Potter characters and well-known public figures redrawn in the series' style. Faces are coherent in the chosen samples; the card notes that distorted faces and bodies remain common and that short prompts work better than descriptive ones.
 
-### Limitations and bias
+<table>
+  <tr>
+    <td><img src="image_1.jpg" width="300" alt="Two characters in green robes at a desk, drawn in anime style"></td>
+    <td><img src="image_2.jpg" width="300" alt="A man with long black hair in a dark coat, drawn in anime style"></td>
+  </tr>
+  <tr>
+    <td>"Still from the Anime, Draco Malfoy"</td>
+    <td>"Still from the Anime, Severus Snape"</td>
+  </tr>
+</table>
 
-Abnormal human features: twisted faces and low-quality body and facial features.
-Only simple prompts yield better results, cannot handle long prompts. 
+## What to learn from this project
 
-## Training details
+Course staff added this section. The project is kept as an example of fine-tuning a large generative model end to end, and of several things to do differently.
 
---validation_epochs=1   
---resolution=1024   
---train_text_encoder   
---train_batch_size=1   
---num_train_epochs=10   
---checkpointing_steps=1000
---gradient_accumulation_steps=8   
---learning_rate=1e-05   
---lr_warmup_steps=500   
---dataloader_num_workers=8   
---allow_tf32   
---mixed_precision="bf16"
---rank=16
+- **Say what is yours.** The base model is Stability AI's, the training code is the diffusers example script, and the dataset is a third party's upload. The team's contribution is the configuration: five runs, five reasoned hyperparameter changes, an FID comparison, prompt exploration, and the derivation. That is a legitimate engineering exercise, and a write-up should say so and credit each piece. The card lists the script's flags without naming the script.
+- **A metric needs a method.** The FID figures come without the number of generated images, the reference set, prompts or seeds, and comparing against the training frames favors the fine-tuned model by construction. A held-out set of frames and a stated protocol would make the 15 percent mean something.
+- **Check the data's terms first.** The dataset has no license and consists of copyrighted stills. For coursework, choose data whose terms you can state in the README.
+- **Keep the record straight.** The card still carries the generator's "proofread and remove this comment" note, its tuning narrative says batch size 2 while its flag list says batch size 1 with accumulation 8, and the sample captions don't match their labels. The repository held 90 checkpoints with optimizer states and a day of delete-and-revert commits. The presentation's "Bayesian-Guided Image Generation" slide has no Bayesian content under it.
+- **The derivation is worth doing, and worth checking.** The posterior-mean formula on the last page has two typos: the leading factor should be one over the square root of alpha_t, not of alpha-bar_t, and the noise coefficient should divide by the square root of one minus alpha-bar_t. The final loss is right.
 
+What the project does demonstrate: a complete fine-tuning run of a multi-billion-parameter diffusion model with a parameter-efficient method, a tuning log with reasons, a measured improvement on a standard metric, a downloadable adapter that works, and a derivation showing the team understood the objective they were optimizing.
 
-# LoRA text2image fine-tuning - yifei28/sdxl-base-1.0-Conan-lora
+## About this project
 
-These are LoRA adaption weights for stabilityai/stable-diffusion-xl-base-1.0. The weights were fine-tuned on the jugg1024/conan-gpt4-captions dataset. You can find some example images in the following. 
+This project was built in Bayesian Machine Learning with Generative AI Applications (ADSP 32014), part of the Master of Science in Applied Data Science at the University of Chicago, in Winter 2025. It is shown here as an example for later cohorts.
 
-![Still from the Anime Character, Mark Zuckerberg](./image_0.jpg)
-Still from the Anime Character, Mark Zuckerberg
+## Changes by course staff
 
-![Still from the Anime, Severus Snape](./image_3.jpg)
-Still from the Anime Character, Robert Downey Jr.
+Course staff copied the authors' Hugging Face repository into this one and made these edits. The authors' commits are unchanged.
 
-![Still from the Anime Character, Robert Downey Jr.](./image_1.jpg)
-Still from the Anime, Draco Malfoy
+- Pushed the Hugging Face git history, 202 commits, into this repository. Large files on Hugging Face are stored as pointers; the 90 checkpoint folders and the weights pointer were removed from the tree, and the derivation PDF and ten of the twelve sample images were restored as real files.
+- Attached the final adapter weights and the license to a release, so the example doesn't depend on the Hugging Face repository.
+- Renamed the authors' README to `MODEL_CARD.md`, unchanged, and added this README, the program banner, a `.gitignore`, and the text of the CreativeML Open RAIL-M license the card declares.
 
-![Still from the Anime, Draco Malfoy](./image_2.jpg)
-Still from the Anime, Severus Snape
+## License
 
-
-LoRA for the text encoder was enabled: True.
-
-VAE used for training: madebyollin/sdxl-vae-fp16-fix.
+The adapter weights are under the CreativeML Open RAIL-M license, as declared by the authors. See [LICENSE](LICENSE), including its use restrictions. The model card, slides and derivation are the authors' own text.

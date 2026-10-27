@@ -1,0 +1,5 @@
+.DS_Store
+# Training outputs. The final weights are a release asset; see the README.
+checkpoint-*/
+*.safetensors
+*.bin
